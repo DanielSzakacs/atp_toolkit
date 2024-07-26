@@ -36,6 +36,34 @@ def download_tennis_atp_match_stat_github(year: int,
     print("Data download")
     f.write(request.content)
 
+def download_tennis_data_co_uk_file_github(year: int,
+                                          target_path: str = "tennis.co.uk_atp_stat"):
+  """
+    Source of the data is: http://www.tennis-data.co.uk/alldata.php
+    Github repo url: https://github.com/DanielSzakacs/atp_data
+
+    CSV files will be downloaded from here: https://raw.githubusercontent.com/DanielSzakacs/atp_data/main/2021.csv
+
+    Args: 
+      year: integer - all the files in the github repozitory is named after a year (2023 or 2022 or ...)
+
+  """
+
+  # Create local directory
+  data_path = Path(target_path)
+
+  if data_path.is_dir():
+    print(f"firectory exists")
+  else:
+    print(f"Directory do not exist ... will be created")
+    data_path.mkdir(parents=True, exist_ok=True)
+
+  # Download data
+  with open(data_path / f"{year}.csv", "wb") as f:
+    request = requests.get(f"https://raw.githubusercontent.com/DanielSzakacs/atp_data/main/{year}.csv")
+    print("Data download")
+    f.write(request.content)
+
 
 def show_csv_table(name: str, 
                    soure_path: str = "github_atp_stat"):
