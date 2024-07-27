@@ -112,6 +112,82 @@ def marge_data_dir_files(folderPath: str = "github_atp_stat"):
   data = pd.concat(dataframes, ignore_index=True)
   return data
 
+
+def form_dataframe_functions(df):
+  """ 
+    This functinos will remove some of the columns and keep only these: 
+    [Location, Tournament, Court, Surface, Player1, Player2, Odds1, Odds2, Odds3, Target]
+  """
+  data = []
+
+  for index, row in df.iterrows():
+    data.append([ row["Location"],
+                 row["Tournament"],
+                #  row["Date"], 
+                  row["Court"],
+                  row["Surface"],
+                  row["Winner"], row["Loser"],
+                  row["B365W"], row["B365L"],
+                  row["PSW"], row["PSL"],
+                  row["AvgW"], row["AvgL"], 1])
+
+    data.append([row["Location"],
+                row["Tournament"],
+                #  row["Date"],
+                 row["Court"],
+                 row["Surface"],
+                 row["Loser"], row["Winner"],
+                 row["B365L"], row["B365W"],
+                 row["PSL"], row["PSW"],
+                 row["AvgL"], row["AvgW"], 0])
+
+  # Create a new DataFrame
+  new_df = pd.DataFrame(data, columns=["Location", 
+                                       "Tourney_name", 
+                                       "Court", 
+                                       "Surface",
+                                       "Player1", "Player2",
+                                       "B3651", "B3652",
+                                       "PS1", "PS2",
+                                       "Avg1", "Avg2",
+                                       "Winner"])
+  print(f"Createing dataframe. Original length: {len(df)} | New length {len(new_df)}")
+
+  return new_df
+
+
+def form_dataframe_functions_oods(df):
+  """ 
+    This functinos will remove ALL the columns which are not odds data: 
+    [Odds1, Odds2, Odds3, Target]
+
+    Odds data 
+    Odds1 = B365
+    Odds2 = Pinnacle
+    Odds3 = Average
+
+    You can find these odds data for the next match in here: https://www.oddsportal.com/football/argentina/liga-profesional/ind-rivadavia-independiente-vH4fu7lB/#1X2;2
+  """
+  data = []
+
+  for index, row in df.iterrows():
+    data.append([row["B365W"], row["B365L"],
+                  row["PSW"], row["PSL"],
+                  row["AvgW"], row["AvgL"], 1])
+
+    data.append([row["B365L"], row["B365W"],
+                 row["PSL"], row["PSW"],
+                 row["AvgL"], row["AvgW"], 0])
+
+  # Create a new DataFrame
+  new_df = pd.DataFrame(data, columns=["B3651", "B3652",
+                                       "PS1", "PS2",
+                                       "Avg1", "Avg2",
+                                       "Winner"])
+  print(f"Createing dataframe. Original length: {len(df)} | New length {len(new_df)}")
+
+  return new_df
+
 def create_dataloaders(
     train_dir: str,
     test_dir: str,
