@@ -9,34 +9,34 @@ from torch.utils.tensorboard import SummaryWriter
 from torchinfo import summary
 
 
-def model_summary(model, 
-                  input_size=(1, 3, 224, 224), 
-                  verbose=1, col_names=["input_size", "output_size", "num_params", "trainable"], 
-                  col_width=20, 
-                  row_settings=["var_names"]):
-    """
-    Generates a summary of the given PyTorch model.
+# def model_summary(model, 
+#                   input_size=(1, 3, 224, 224), 
+#                   verbose=1, col_names=["input_size", "output_size", "num_params", "trainable"], 
+#                   col_width=20, 
+#                   row_settings=["var_names"]):
+#     """
+#     Generates a summary of the given PyTorch model.
 
-    Parameters:
-    model (torch.nn.Module): The PyTorch model to summarize.
-    input_size (tuple): The size of the input tensor.
-    verbose (int): Verbosity level (0 or 1).
-    col_names (list): List of column names to display.
-    col_width (int): Width of each column.
-    row_settings (list): Row settings.
+#     Parameters:
+#     model (torch.nn.Module): The PyTorch model to summarize.
+#     input_size (tuple): The size of the input tensor.
+#     verbose (int): Verbosity level (0 or 1).
+#     col_names (list): List of column names to display.
+#     col_width (int): Width of each column.
+#     row_settings (list): Row settings.
 
-    Returns:
-    None
-    """
-    try:
-      summary(model,
-            input_size=input_size,
-            verbose=verbose,
-            col_names=col_names,
-            col_width=col_width,
-            row_settings=row_settings)
-    except:
-      print("[ERROR] Make sure you import summary from torchinfo. Can not display the model summary")
+#     Returns:
+#     None
+#     """
+#     try:
+#       summary(model,
+#             input_size=input_size,
+#             verbose=verbose,
+#             col_names=col_names,
+#             col_width=col_width,
+#             row_settings=row_settings)
+#     except:
+#       print("[ERROR] Make sure you import summary from torchinfo. Can not display the model summary")
 
 
 # Set seeds

@@ -195,165 +195,165 @@ def form_dataframe_functions_oods(df):
   return new_df
 
 
-def create_dataloaders(
-    data: pd.DataFrame,
-    target_column: str,
-    batch_size: int,
-    num_workers: int = 4,
-    test_size: float = 0.2,
-    random_state: int = 42
-):
-    """Creates training and testing DataLoaders for tabular data.
+# def create_dataloaders(
+#     data: pd.DataFrame,
+#     target_column: str,
+#     batch_size: int,
+#     num_workers: int = 4,
+#     test_size: float = 0.2,
+#     random_state: int = 42
+# ):
+#     """Creates training and testing DataLoaders for tabular data.
 
-    Args:
-        data: Pandas DataFrame containing the entire dataset.
-        target_column: Name of the target column.
-        batch_size: Number of samples per batch in each of the DataLoaders.
-        num_workers: An integer for number of workers per DataLoader.
-        test_size: Proportion of the dataset to include in the test split.
-        random_state: Seed used by the random number generator for train/test split.
+#     Args:
+#         data: Pandas DataFrame containing the entire dataset.
+#         target_column: Name of the target column.
+#         batch_size: Number of samples per batch in each of the DataLoaders.
+#         num_workers: An integer for number of workers per DataLoader.
+#         test_size: Proportion of the dataset to include in the test split.
+#         random_state: Seed used by the random number generator for train/test split.
 
-    Returns:
-        A tuple of (train_dataloader, test_dataloader, feature_names, class_names).
-        Where class_names is a list of the target classes.
-    """
-    # Separate features and target
-    X = data.drop(columns=[target_column])
-    y = data[target_column]
+#     Returns:
+#         A tuple of (train_dataloader, test_dataloader, feature_names, class_names).
+#         Where class_names is a list of the target classes.
+#     """
+#     # Separate features and target
+#     X = data.drop(columns=[target_column])
+#     y = data[target_column]
 
-    # Encode categorical features and target
-    for column in X.select_dtypes(include=['object']).columns:
-        le = LabelEncoder()
-        X[column] = le.fit_transform(X[column])
-    if y.dtype == 'object':
-        le = LabelEncoder()
-        y = le.fit_transform(y)
-        class_names = le.classes_.tolist()
-    else:
-        if y.nunique() < 20:  # Arbitrary threshold to assume it's a classification task
-            class_names = y.unique().tolist()
-            class_names.sort()  # Ensure class names are sorted
+#     # Encode categorical features and target
+#     for column in X.select_dtypes(include=['object']).columns:
+#         le = LabelEncoder()
+#         X[column] = le.fit_transform(X[column])
+#     if y.dtype == 'object':
+#         le = LabelEncoder()
+#         y = le.fit_transform(y)
+#         class_names = le.classes_.tolist()
+#     else:
+#         if y.nunique() < 20:  # Arbitrary threshold to assume it's a classification task
+#             class_names = y.unique().tolist()
+#             class_names.sort()  # Ensure class names are sorted
 
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state)
+#     # Split the data into training and testing sets
+#     X_train, X_test, y_train, y_test = train_test_split(
+#         X, y, test_size=test_size, random_state=random_state)
 
-    # Normalize the features
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+#     # Normalize the features
+#     scaler = StandardScaler()
+#     X_train = scaler.fit_transform(X_train)
+#     X_test = scaler.transform(X_test)
 
-    # Convert to PyTorch tensors
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-    y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.long)
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    y_test_tensor = torch.tensor(y_test.to_numpy(), dtype=torch.long)
+#     # Convert to PyTorch tensors
+#     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+#     y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.long)
+#     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+#     y_test_tensor = torch.tensor(y_test.to_numpy(), dtype=torch.long)
 
-    # Create TensorDatasets and DataLoaders
-    train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-    test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
+#     # Create TensorDatasets and DataLoaders
+#     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+#     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 
-    train_dataloader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=True,
-    )
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True,
-    )
+#     train_dataloader = DataLoader(
+#         train_dataset,
+#         batch_size=batch_size,
+#         shuffle=True,
+#         num_workers=num_workers,
+#         pin_memory=True,
+#     )
+#     test_dataloader = DataLoader(
+#         test_dataset,
+#         batch_size=batch_size,
+#         shuffle=False,
+#         num_workers=num_workers,
+#         pin_memory=True,
+#     )
 
-    feature_names = X.columns.tolist()
+#     feature_names = X.columns.tolist()
 
-    return train_dataloader, test_dataloader, feature_names, class_names
+#     return train_dataloader, test_dataloader, feature_names, class_names
 
-def create_dataloaders_with_encoder(
-    data: pd.DataFrame,
-    target_column: str,
-    batch_size: int,
-    num_workers: int = 4,
-    test_size: float = 0.2,
-    random_state: int = 42
-):
-    """Creates training and testing DataLoaders for tabular data.
+# def create_dataloaders_with_encoder(
+#     data: pd.DataFrame,
+#     target_column: str,
+#     batch_size: int,
+#     num_workers: int = 4,
+#     test_size: float = 0.2,
+#     random_state: int = 42
+# ):
+#     """Creates training and testing DataLoaders for tabular data.
 
-    Args:
-        data: Pandas DataFrame containing the entire dataset.
-        target_column: Name of the target column.
-        batch_size: Number of samples per batch in each of the DataLoaders.
-        num_workers: An integer for number of workers per DataLoader.
-        test_size: Proportion of the dataset to include in the test split.
-        random_state: Seed used by the random number generator for train/test split.
+#     Args:
+#         data: Pandas DataFrame containing the entire dataset.
+#         target_column: Name of the target column.
+#         batch_size: Number of samples per batch in each of the DataLoaders.
+#         num_workers: An integer for number of workers per DataLoader.
+#         test_size: Proportion of the dataset to include in the test split.
+#         random_state: Seed used by the random number generator for train/test split.
 
-    Returns:
-        A tuple of (train_dataloader, test_dataloader, feature_names, class_names, encoders).
-        Where class_names is a list of the target classes and encoders is a dictionary of LabelEncoders.
-    """
-    # Separate features and target
-    X = data.drop(columns=[target_column])
-    y = data[target_column]
+#     Returns:
+#         A tuple of (train_dataloader, test_dataloader, feature_names, class_names, encoders).
+#         Where class_names is a list of the target classes and encoders is a dictionary of LabelEncoders.
+#     """
+#     # Separate features and target
+#     X = data.drop(columns=[target_column])
+#     y = data[target_column]
 
-    encoders = {}
+#     encoders = {}
     
-    # Encode categorical features
-    for column in X.select_dtypes(include=['object']).columns:
-        le = LabelEncoder()
-        X[column] = le.fit_transform(X[column])
-        encoders[column] = le  # Store the encoder
+#     # Encode categorical features
+#     for column in X.select_dtypes(include=['object']).columns:
+#         le = LabelEncoder()
+#         X[column] = le.fit_transform(X[column])
+#         encoders[column] = le  # Store the encoder
     
-    class_names = None
-    if y.dtype == 'object':
-        le = LabelEncoder()
-        y = le.fit_transform(y)
-        class_names = le.classes_.tolist()
-        encoders[target_column] = le  # Store the encoder
-    else:
-        if y.nunique() < 20:  # Arbitrary threshold to assume it's a classification task
-            class_names = y.unique().tolist()
-            class_names.sort()  # Ensure class names are sorted
+#     class_names = None
+#     if y.dtype == 'object':
+#         le = LabelEncoder()
+#         y = le.fit_transform(y)
+#         class_names = le.classes_.tolist()
+#         encoders[target_column] = le  # Store the encoder
+#     else:
+#         if y.nunique() < 20:  # Arbitrary threshold to assume it's a classification task
+#             class_names = y.unique().tolist()
+#             class_names.sort()  # Ensure class names are sorted
     
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=random_state)
+#     # Split the data into training and testing sets
+#     X_train, X_test, y_train, y_test = train_test_split(
+#         X, y, test_size=test_size, random_state=random_state)
 
-    # Normalize the features
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+#     # Normalize the features
+#     scaler = StandardScaler()
+#     X_train = scaler.fit_transform(X_train)
+#     X_test = scaler.transform(X_test)
 
-    # Convert to PyTorch tensors
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-    y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.long)
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    y_test_tensor = torch.tensor(y_test.to_numpy(), dtype=torch.long)
+#     # Convert to PyTorch tensors
+#     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+#     y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.long)
+#     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+#     y_test_tensor = torch.tensor(y_test.to_numpy(), dtype=torch.long)
 
-    # Create TensorDatasets and DataLoaders
-    train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-    test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
+#     # Create TensorDatasets and DataLoaders
+#     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+#     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 
-    train_dataloader = DataLoader(
-        train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=True,
-    )
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True,
-    )
+#     train_dataloader = DataLoader(
+#         train_dataset,
+#         batch_size=batch_size,
+#         shuffle=True,
+#         num_workers=num_workers,
+#         pin_memory=True,
+#     )
+#     test_dataloader = DataLoader(
+#         test_dataset,
+#         batch_size=batch_size,
+#         shuffle=False,
+#         num_workers=num_workers,
+#         pin_memory=True,
+#     )
 
-    feature_names = X.columns.tolist()
+#     feature_names = X.columns.tolist()
 
-    return train_dataloader, test_dataloader, feature_names, class_names, encoders
+#     return train_dataloader, test_dataloader, feature_names, class_names, encoders
 
 def prepare_data(data: pd.DataFrame,
                  target_column: str,
