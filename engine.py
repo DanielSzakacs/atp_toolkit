@@ -9,6 +9,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from pytorch_tabnet.tab_model import TabNetClassifier
+import os
+from sklearn.metrics import accuracy_score
 
 
 def create_tab_net_classifier(optimizer=torch.optim.Adam,
@@ -41,6 +43,7 @@ def create_tab_net_classifier(optimizer=torch.optim.Adam,
     scheduler_fn=scheduler_fn,
     mask_type=mask_type
   )
+  print(f"[INFO] Model created")
   return clf
 
 
