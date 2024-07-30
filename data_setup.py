@@ -9,6 +9,8 @@ from pathlib import Path
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
+import joblib
+
 
 NUM_WORKERS = os.cpu_count()
 
@@ -352,3 +354,66 @@ def create_dataloaders_with_encoder(
     feature_names = X.columns.tolist()
 
     return train_dataloader, test_dataloader, feature_names, class_names, encoders
+
+def prepare_data(data: pd.DataFrame,
+                 target_column: str,
+                 test_size: int,
+                 save_encoder: bool=False):
+  """
+    Removes all rows which contains NaN
+    Encode the objects
+    Saves the encoder if params true
+    Split data to train and test
+
+    Args: 
+      data: pd.DataFrame
+      target_column: str - name of the target
+      test_size: int,
+      save_encoder: bool
+
+    Returns: 
+      X_train, X_test, y_train, y_test
+      encoder
+  """
+
+  print(f"[INFO] Input data length: {len(data)}")
+  # Drop NaN rows
+  clear_df = data.dropna()
+  print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
+
+  # Split data to X and y 
+  X = clear_df.drop(columns=[target_column])
+  y = clear_df[target_column]
+  print(f"[INFO] DataFrame has been splid to X and y")
+
+  # Encode X features if type object 
+  encoder = {}
+  for column in X.select_dtypes(include=['object']).columns:
+    le = LabelEncoder()
+    X[column] = le.fit_transform(X[column])
+    encoder[column] = le
+  print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns has been numerized")
+
+  # Save the encoder if save_encoder == true
+  if save_encoder :
+      encoder_path = Path("encoder")
+                   
+      print(f"[INFO] Save encoders to folder")
+      # Check if the folder exist
+      if encoder_path.is_dir():
+        print(f"[INFO] Encoder folder exist")
+      else:
+        print(f"[INFO] Creating encoders folder ...")
+        encoder_path.mkdir(parents=True, exist_ok=True)
+      # Save endoder to the folder
+      for key, value in encoder.items():
+        print(f"[INFO] Save encoder by the name {key}_encoder.pkl")
+        path = encoder_path / f"{key}_encoder.pkl"
+        joblib.dump(value, path)
+
+  # Split to train and test data 
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+  print(f"[INFO] Data splited to train and test data")
+
+  # Return
+  return X_train, X_test, y_train, y_test, encoder
