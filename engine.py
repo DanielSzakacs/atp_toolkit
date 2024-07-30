@@ -2,7 +2,7 @@
 Contains functions for training and testing a PyTorch model.
 """
 
-from typing import Dict, List
+from typing import Tuple, Dict, List
 from tqdm import tqdm
 import torch
 import torch.nn as nn
