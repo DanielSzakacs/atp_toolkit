@@ -377,6 +377,9 @@ def prepare_data(data: pd.DataFrame,
   """
 
   print(f"[INFO] Input data length: {len(data)}")
+  # Shuffle the data rows
+  data = data.sample(frac=1)
+
   # Drop NaN rows
   clear_df = data.dropna()
   print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
