@@ -47,7 +47,9 @@ def create_tab_net_classifier(optimizer=torch.optim.Adam,
   return clf
 
 
-def train_tab_net_classifier(model,
+def train_tab_net_classifier(
+                             name:str,
+                             model,
                              X_train, 
                              X_test, 
                              y_train, 
@@ -100,6 +102,17 @@ def train_tab_net_classifier(model,
 
   accuracy = accuracy_score(y_test_np, y_pred)
   print(f"Test accuracy {accuracy * 100:.2f}%")
+
+  print(f"[ARGS] Length of the X_train: {len(X_train)}")
+  print(f"[ARGS] Eval_name: {eval_name}")
+  print(f"[ARGS] Eval_metric: {eval_metric}")
+  print(f"[ARGS] Max_epochs: {max_epochs}")
+  print(f"[ARGS] Patience: {patience}")
+  print(f"[ARGS] Batch_size: {batch_size}")
+  print(f"[ARGS] V_batch_size: {v_batch_size}")
+  print(f"[ARGS] Drop_last: {drop_last}")
+
+  print(f"[INFO] Save model as `model_{name}.`")
 
   return model
 
