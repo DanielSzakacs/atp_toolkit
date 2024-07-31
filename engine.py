@@ -124,6 +124,12 @@ def train_tab_net_classifier(
 
     return model
 
+
+def load_tab_net_classifier(path:str):
+  clf = TabNetClassifier()
+  clf.load_model(path)
+  return clf 
+
 # def train_with_writer(model: TabNetClassifier,
 #                       train_dataloader: torch.utils.data.DataLoader,
 #                       test_dataloader: torch.utils.data.DataLoader,
