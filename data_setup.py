@@ -182,16 +182,19 @@ def form_dataframe_functions_oods(df):
   for index, row in df.iterrows():
     data.append([row["B365W"], row["B365L"],
                   row["PSW"], row["PSL"],
-                  row["AvgW"], row["AvgL"], 1])
+                  row["AvgW"], row["AvgL"],
+                   row["MaxW"], row["MaxL"], 1])
 
     data.append([row["B365L"], row["B365W"],
                  row["PSL"], row["PSW"],
-                 row["AvgL"], row["AvgW"], 0])
+                 row["AvgL"], row["AvgW"],
+                  row["MaxL"], row["MaxW"], 0])
 
   # Create a new DataFrame
   new_df = pd.DataFrame(data, columns=["B3651", "B3652",
                                        "PS1", "PS2",
                                        "Avg1", "Avg2",
+                                       "Max1", "Max2",
                                        "Winner"])
   print(f"Createing dataframe. Original length: {len(df)} | New length {len(new_df)}")
 
