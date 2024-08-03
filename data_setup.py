@@ -201,171 +201,80 @@ def form_dataframe_functions_oods(df):
   return new_df
 
 
-# def create_dataloaders(
-#     data: pd.DataFrame,
-#     target_column: str,
-#     batch_size: int,
-#     num_workers: int = 4,
-#     test_size: float = 0.2,
-#     random_state: int = 42
-# ):
-#     """Creates training and testing DataLoaders for tabular data.
+# def prepare_data(data: pd.DataFrame,
+#                  target_column: str,
+#                  test_size: int,
+#                  save_encoder: bool=False):
+#   """
+#     Removes all rows which contains NaN
+#     Encode the objects
+#     Saves the encoder if params true
+#     Split data to train and test
 
-#     Args:
-#         data: Pandas DataFrame containing the entire dataset.
-#         target_column: Name of the target column.
-#         batch_size: Number of samples per batch in each of the DataLoaders.
-#         num_workers: An integer for number of workers per DataLoader.
-#         test_size: Proportion of the dataset to include in the test split.
-#         random_state: Seed used by the random number generator for train/test split.
+#     Args: 
+#       data: pd.DataFrame
+#       target_column: str - name of the target
+#       test_size: int,
+#       save_encoder: bool
 
-#     Returns:
-#         A tuple of (train_dataloader, test_dataloader, feature_names, class_names).
-#         Where class_names is a list of the target classes.
-#     """
-#     # Separate features and target
-#     X = data.drop(columns=[target_column])
-#     y = data[target_column]
+#     Returns: 
+#       X_train, X_test, y_train, y_test
+#       encoder
+#   """
 
-#     # Encode categorical features and target
-#     for column in X.select_dtypes(include=['object']).columns:
-#         le = LabelEncoder()
-#         X[column] = le.fit_transform(X[column])
-#     if y.dtype == 'object':
-#         le = LabelEncoder()
-#         y = le.fit_transform(y)
-#         class_names = le.classes_.tolist()
-#     else:
-#         if y.nunique() < 20:  # Arbitrary threshold to assume it's a classification task
-#             class_names = y.unique().tolist()
-#             class_names.sort()  # Ensure class names are sorted
+#   print(f"[INFO] Input data length: {len(data)}")
+#   # Shuffle the data rows
+#   data = data.sample(frac=1)
 
-#     # Split the data into training and testing sets
-#     X_train, X_test, y_train, y_test = train_test_split(
-#         X, y, test_size=test_size, random_state=random_state)
+#   # Drop NaN rows
+#   clear_df = data.dropna()
+#   print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
 
-#     # Normalize the features
-#     scaler = StandardScaler()
-#     X_train = scaler.fit_transform(X_train)
-#     X_test = scaler.transform(X_test)
+#   # Split data to X and y 
+#   X = clear_df.drop(columns=[target_column])
+#   y = clear_df[target_column]
+#   print(f"[INFO] DataFrame has been splid to X and y")
 
-#     # Convert to PyTorch tensors
-#     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-#     y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.long)
-#     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-#     y_test_tensor = torch.tensor(y_test.to_numpy(), dtype=torch.long)
+#   # Encode X features if type object 
+#   encoder = {}
+#   for column in X.select_dtypes(include=['object']).columns:
+#     le = LabelEncoder()
+#     X[column] = le.fit_transform(X[column])
+#     encoder[column] = le
+#   print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns has been numerized")
 
-#     # Create TensorDatasets and DataLoaders
-#     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-#     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
+#   # Save the encoder if save_encoder == true
+#   if save_encoder :
+#       encoder_path = Path("encoder")
+                   
+#       print(f"[INFO] Save encoders to folder")
+#       # Check if the folder exist
+#       if encoder_path.is_dir():
+#         print(f"[INFO] Encoder folder exist")
+#       else:
+#         print(f"[INFO] Creating encoders folder ...")
+#         encoder_path.mkdir(parents=True, exist_ok=True)
+#       # Save endoder to the folder
+#       for key, value in encoder.items():
+#         print(f"[INFO] Save encoder by the name {key}_encoder.pkl")
+#         path = encoder_path / f"{key}_encoder.pkl"
+#         joblib.dump(value, path)
 
-#     train_dataloader = DataLoader(
-#         train_dataset,
-#         batch_size=batch_size,
-#         shuffle=True,
-#         num_workers=num_workers,
-#         pin_memory=True,
-#     )
-#     test_dataloader = DataLoader(
-#         test_dataset,
-#         batch_size=batch_size,
-#         shuffle=False,
-#         num_workers=num_workers,
-#         pin_memory=True,
-#     )
+#   # Split to train and test data 
+#   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+#   print(f"[INFO] Data splited to train and test data")
 
-#     feature_names = X.columns.tolist()
+#   # Return
+#   return X_train, X_test, y_train, y_test, encoder
 
-#     return train_dataloader, test_dataloader, feature_names, class_names
 
-# def create_dataloaders_with_encoder(
-#     data: pd.DataFrame,
-#     target_column: str,
-#     batch_size: int,
-#     num_workers: int = 4,
-#     test_size: float = 0.2,
-#     random_state: int = 42
-# ):
-#     """Creates training and testing DataLoaders for tabular data.
-
-#     Args:
-#         data: Pandas DataFrame containing the entire dataset.
-#         target_column: Name of the target column.
-#         batch_size: Number of samples per batch in each of the DataLoaders.
-#         num_workers: An integer for number of workers per DataLoader.
-#         test_size: Proportion of the dataset to include in the test split.
-#         random_state: Seed used by the random number generator for train/test split.
-
-#     Returns:
-#         A tuple of (train_dataloader, test_dataloader, feature_names, class_names, encoders).
-#         Where class_names is a list of the target classes and encoders is a dictionary of LabelEncoders.
-#     """
-#     # Separate features and target
-#     X = data.drop(columns=[target_column])
-#     y = data[target_column]
-
-#     encoders = {}
-    
-#     # Encode categorical features
-#     for column in X.select_dtypes(include=['object']).columns:
-#         le = LabelEncoder()
-#         X[column] = le.fit_transform(X[column])
-#         encoders[column] = le  # Store the encoder
-    
-#     class_names = None
-#     if y.dtype == 'object':
-#         le = LabelEncoder()
-#         y = le.fit_transform(y)
-#         class_names = le.classes_.tolist()
-#         encoders[target_column] = le  # Store the encoder
-#     else:
-#         if y.nunique() < 20:  # Arbitrary threshold to assume it's a classification task
-#             class_names = y.unique().tolist()
-#             class_names.sort()  # Ensure class names are sorted
-    
-#     # Split the data into training and testing sets
-#     X_train, X_test, y_train, y_test = train_test_split(
-#         X, y, test_size=test_size, random_state=random_state)
-
-#     # Normalize the features
-#     scaler = StandardScaler()
-#     X_train = scaler.fit_transform(X_train)
-#     X_test = scaler.transform(X_test)
-
-#     # Convert to PyTorch tensors
-#     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-#     y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.long)
-#     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-#     y_test_tensor = torch.tensor(y_test.to_numpy(), dtype=torch.long)
-
-#     # Create TensorDatasets and DataLoaders
-#     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-#     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
-
-#     train_dataloader = DataLoader(
-#         train_dataset,
-#         batch_size=batch_size,
-#         shuffle=True,
-#         num_workers=num_workers,
-#         pin_memory=True,
-#     )
-#     test_dataloader = DataLoader(
-#         test_dataset,
-#         batch_size=batch_size,
-#         shuffle=False,
-#         num_workers=num_workers,
-#         pin_memory=True,
-#     )
-
-#     feature_names = X.columns.tolist()
-
-#     return train_dataloader, test_dataloader, feature_names, class_names, encoders
+# // ----------------
 
 def prepare_data(data: pd.DataFrame,
                  target_column: str,
-                 test_size: int,
+                 test_size: float,
                  save_encoder: bool=False):
-  """
+    """
     Removes all rows which contains NaN
     Encode the objects
     Saves the encoder if params true
@@ -374,55 +283,77 @@ def prepare_data(data: pd.DataFrame,
     Args: 
       data: pd.DataFrame
       target_column: str - name of the target
-      test_size: int,
+      test_size: float,
       save_encoder: bool
 
     Returns: 
       X_train, X_test, y_train, y_test
       encoder
-  """
+    """
 
-  print(f"[INFO] Input data length: {len(data)}")
-  # Shuffle the data rows
-  data = data.sample(frac=1)
+    print(f"[INFO] Input data length: {len(data)}")
+    # Shuffle the data rows
+    data = data.sample(frac=1).reset_index(drop=True)
 
-  # Drop NaN rows
-  clear_df = data.dropna()
-  print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
+    # Drop NaN rows
+    clear_df = data.dropna()
+    print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
 
-  # Split data to X and y 
-  X = clear_df.drop(columns=[target_column])
-  y = clear_df[target_column]
-  print(f"[INFO] DataFrame has been splid to X and y")
+    # Split data to X and y 
+    X = clear_df.drop(columns=[target_column])
+    y = clear_df[target_column]
+    print(f"[INFO] Split to X and y")
 
-  # Encode X features if type object 
-  encoder = {}
-  for column in X.select_dtypes(include=['object']).columns:
-    le = LabelEncoder()
-    X[column] = le.fit_transform(X[column])
-    encoder[column] = le
-  print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns has been numerized")
+    # Split data into train and test data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+    print(f"[INFO] Data split to train and test data")
 
-  # Save the encoder if save_encoder == true
-  if save_encoder :
-      encoder_path = Path("encoder")
-                   
-      print(f"[INFO] Save encoders to folder")
-      # Check if the folder exist
-      if encoder_path.is_dir():
-        print(f"[INFO] Encoder folder exist")
-      else:
-        print(f"[INFO] Creating encoders folder ...")
+    # Scale numerical data 
+    scaler = StandardScaler()
+    # Get the numerical features
+    numerical_features = X_train.select_dtypes(include=["int64", "float64"]).columns
+    # Fit the scaler on the training data and transform the training data
+    X_train[numerical_features] = scaler.fit_transform(X_train[numerical_features])
+    # Transform the test data
+    X_test[numerical_features] = scaler.transform(X_test[numerical_features])
+    print(f"[INFO] Scaler: {len(numerical_features)} number of features have been scaled (Both train and test data)") 
+
+    # Save scaler
+    scaler_path = Path("scaler/scaler.joblib")
+    scaler_path.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, scaler_path)
+    print(f"[INFO] Scaler saved to {scaler_path}")
+
+    # Encode X features if type object
+    encoder = {}
+    for column in X.select_dtypes(include=['object']).columns:
+        # Convert all values to strings to ensure uniformity
+        X_train[column] = X_train[column].astype(str)
+        X_test[column] = X_test[column].astype(str)
+        le = LabelEncoder()
+        X_train[column] = le.fit_transform(X_train[column])
+        try:
+            X_test[column] = le.transform(X_test[column])
+        except ValueError as e:
+            # Log the error and assign a default value (e.g., -1) to unseen labels
+            print(f"[WARNING] Unseen label in column '{column}': {e}")
+            unseen_labels = set(X_test[column].unique()) - set(le.classes_)
+            unseen_label_map = {label: -1 for label in unseen_labels}
+            X_test[column] = X_test[column].map(lambda x: le.transform([x])[0] if x in le.classes_ else unseen_label_map[x])
+        encoder[column] = le
+    print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns have been encoded")
+
+    # Save the encoder if save_encoder == true
+    if save_encoder:
+        encoder_path = Path("encoder")
+        print(f"[INFO] Save encoders to folder")
         encoder_path.mkdir(parents=True, exist_ok=True)
-      # Save endoder to the folder
-      for key, value in encoder.items():
-        print(f"[INFO] Save encoder by the name {key}_encoder.pkl")
-        path = encoder_path / f"{key}_encoder.pkl"
-        joblib.dump(value, path)
 
-  # Split to train and test data 
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
-  print(f"[INFO] Data splited to train and test data")
+        # Save each encoder to the folder
+        for key, value in encoder.items():
+            path = encoder_path / f"{key}_encoder.pkl"
+            joblib.dump(value, path)
+            print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
 
-  # Return
-  return X_train, X_test, y_train, y_test, encoder
+    # Return
+    return X_train, X_test, y_train, y_test, encoder
