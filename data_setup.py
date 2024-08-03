@@ -158,7 +158,7 @@ def form_dataframe_functions(df):
                                        "B3651", "B3652",
                                        "PS1", "PS2",
                                        "Avg1", "Avg2",
-                                       "Max1", "Max2"
+                                       "Max1", "Max2",
                                        "Winner"])
   print(f"Createing dataframe. Original length: {len(df)} | New length {len(new_df)}")
 
