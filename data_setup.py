@@ -129,7 +129,7 @@ def form_dataframe_functions(df):
   for index, row in df.iterrows():
     data.append([ row["Location"],
                  row["Tournament"],
-                #  row["Date"], 
+                 row["Date"], 
                   row["Court"],
                   row["Surface"],
                   row["Winner"], row["Loser"],
@@ -140,7 +140,7 @@ def form_dataframe_functions(df):
 
     data.append([row["Location"],
                 row["Tournament"],
-                #  row["Date"],
+                 row["Date"],
                  row["Court"],
                  row["Surface"],
                  row["Loser"], row["Winner"],
@@ -152,6 +152,7 @@ def form_dataframe_functions(df):
   # Create a new DataFrame
   new_df = pd.DataFrame(data, columns=["Location", 
                                        "Tourney_name", 
+                                       "Date",
                                        "Court", 
                                        "Surface",
                                        "Player1", "Player2",
