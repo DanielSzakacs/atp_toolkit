@@ -202,7 +202,7 @@ def form_dataframe_functions_oods(df):
   return new_df
 
 
-def form_dataframe_v2(data:pd.DataFrame):
+def form_dataframe_v2(df):
   """ 
     This functinos will remove some of the columns and keep only these: 
     [Date, Player1, Player2, Odds1, Odds2, Odds3, Target]
