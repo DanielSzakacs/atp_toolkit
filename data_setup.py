@@ -202,6 +202,41 @@ def form_dataframe_functions_oods(df):
   return new_df
 
 
+def form_dataframe_functions_oods(df):
+  """ 
+    This functinos will remove ALL the columns which are not odds data: 
+    [Odds1, Odds2, Odds3, Target]
+
+    Odds data 
+    Odds1 = B365
+    Odds2 = Pinnacle
+    Odds3 = Average
+
+    You can find these odds data for the next match in here: https://www.oddsportal.com/football/argentina/liga-profesional/ind-rivadavia-independiente-vH4fu7lB/#1X2;2
+  """
+  data = []
+
+  for index, row in df.iterrows():
+    data.append([row["B365W"], row["B365L"],
+                  row["PSW"], row["PSL"],
+                  row["AvgW"], row["AvgL"],
+                   row["MaxW"], row["MaxL"], 1])
+
+    data.append([row["B365L"], row["B365W"],
+                 row["PSL"], row["PSW"],
+                 row["AvgL"], row["AvgW"],
+                  row["MaxL"], row["MaxW"], 0])
+
+  # Create a new DataFrame
+  new_df = pd.DataFrame(data, columns=["B3651", "B3652",
+                                       "PS1", "PS2",
+                                       "Avg1", "Avg2",
+                                       "Max1", "Max2",
+                                       "Winner"])
+  print(f"Createing dataframe. Original length: {len(df)} | New length {len(new_df)}")
+
+  return new_df
+
 # def prepare_data(data: pd.DataFrame,
 #                  target_column: str,
 #                  test_size: int,
@@ -318,6 +353,114 @@ def prepare_data(data: pd.DataFrame,
     # Transform the test data
     X_test[numerical_features] = scaler.transform(X_test[numerical_features])
     print(f"[INFO] Scaler: {len(numerical_features)} number of features have been scaled (Both train and test data)") 
+
+    # Save scaler
+    scaler_path = Path("scaler/scaler.joblib")
+    scaler_path.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, scaler_path)
+    print(f"[INFO] Scaler saved to {scaler_path}")
+
+    # Encode X features if type object
+    encoder = {}
+    for column in X.select_dtypes(include=['object']).columns:
+        # Convert all values to strings to ensure uniformity
+        X_train[column] = X_train[column].astype(str)
+        X_test[column] = X_test[column].astype(str)
+        le = LabelEncoder()
+        X_train[column] = le.fit_transform(X_train[column])
+        try:
+            X_test[column] = le.transform(X_test[column])
+        except ValueError as e:
+            # Log the error and assign a default value (e.g., -1) to unseen labels
+            print(f"[WARNING] Unseen label in column '{column}': {e}")
+            unseen_labels = set(X_test[column].unique()) - set(le.classes_)
+            unseen_label_map = {label: -1 for label in unseen_labels}
+            X_test[column] = X_test[column].map(lambda x: le.transform([x])[0] if x in le.classes_ else unseen_label_map[x])
+        encoder[column] = le
+    print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns have been encoded")
+
+    # Save the encoder if save_encoder == true
+    if save_encoder:
+        encoder_path = Path("encoder")
+        print(f"[INFO] Save encoders to folder")
+        encoder_path.mkdir(parents=True, exist_ok=True)
+
+        # Save each encoder to the folder
+        for key, value in encoder.items():
+            path = encoder_path / f"{key}_encoder.pkl"
+            joblib.dump(value, path)
+            print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
+
+    # Return
+    return X_train, X_test, y_train, y_test, encoder
+
+
+def extract_date_feature(df, date_column):
+  df[date_column] = pd.to_datetime(df[date_column])
+  df[f"{date_column}_year"] = df[date_column].dt.year
+  df[f"{date_column}_month"] = df[date_column].dt.month
+  df[f"{date_column}_day"] = df[date_column].dt.day
+  df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek
+
+  return df.drop(columns=[date_column])
+
+
+# Split, form date, skale numerical data, encode object type of features
+def prepare_data_with_data(data: pd.DataFrame,
+                 target_column: str,
+                 test_size: float,
+                 date_column: str,
+                 save_encoder: bool=False):
+    """
+    Removes all rows which contains NaN
+    Encode the objects
+    Saves the encoder if params true
+    Split data to train and test
+
+    Args:
+      data: pd.DataFrame
+      target_column: str - name of the target
+      test_size: float,
+      save_encoder: bool
+
+    Returns:
+      X_train, X_test, y_train, y_test
+      encoder
+    """
+
+    print(f"[INFO] Input data length: {len(data)}")
+    # Shuffle the data rows
+    data = data.sample(frac=1).reset_index(drop=True)
+
+    # Drop NaN rows
+    clear_df = data.dropna()
+    print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
+
+    # Process date columns
+    clear_df = extract_date_feature(clear_df, date_column)
+    print(f"[INFO] Processed data columns: {date_column}")
+
+    # Split data to X and y
+    X = clear_df.drop(columns=[target_column])
+    y = clear_df[target_column]
+    print(f"[INFO] Split to X and y")
+
+    # Split data into train and test data
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+    print(f"[INFO] Data split to train and test data")
+
+    # Scale numerical data
+    scaler = StandardScaler()
+    # Get the numerical features (excluding extracted date columns)
+    exclude_features = [f'{date_column}_year', f'{date_column}_month', f'{date_column}_day', f'{date_column}_dayofweek']
+    numerical_features = [col for col in X_train.select_dtypes(include=["int64", "float64"]).columns if col not in exclude_features]
+    # X_train.select_dtypes(include=["int64", "float64"]).columns
+
+    # Fit the scaler on the training data and transform the training data
+    X_train[numerical_features] = scaler.fit_transform(X_train[numerical_features])
+    # Transform the test data
+    X_test[numerical_features] = scaler.transform(X_test[numerical_features])
+    print(f"[INFO] Scaler: {len(numerical_features)} number of features have been scaled (Both train and test data)")
 
     # Save scaler
     scaler_path = Path("scaler/scaler.joblib")
