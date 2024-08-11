@@ -11,6 +11,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import joblib
 
+import numpy as np
+
 
 NUM_WORKERS = os.cpu_count()
 
