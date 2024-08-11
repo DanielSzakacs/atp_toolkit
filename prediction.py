@@ -89,7 +89,7 @@ def predict(model_path: str,
   print(f"[INFO] Encode the object features")
   encoders = load_label_encoders(encoder_path)
   for column in raw_data.select_dtypes(include=['object']).columns:
-    e = encoders[column]
+    e = encoders[column + "_encoder"]
     if e:
       print(f"Columns: {column}; Encoder: {e}")
       try:
@@ -101,5 +101,5 @@ def predict(model_path: str,
 
   print(f"[INFO] Dataframe to numpy")
   raw_data_np = raw_data.to_numpy()
-  prediction = model.predict(raw_data_np)
-  print(f"[PREDICTION]  {prediction}")
+  pred_result = model.predict(raw_data_np)
+  print(f"[PREDICTION]  {pred_result}")
