@@ -240,10 +240,11 @@ def form_dataframe_v2(df):
 
 def extract_date_feature(df, date_column):
   df[date_column] = pd.to_datetime(df[date_column])
-  df[f"{date_column}_year"] = df[date_column].dt.year
-  df[f"{date_column}_month"] = df[date_column].dt.month
-  df[f"{date_column}_day"] = df[date_column].dt.day
-  df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek
+  df[f"{date_column}_year"] = df[date_column].dt.year.astype(np.int64)
+  df[f"{date_column}_month"] = df[date_column].dt.month.astype(np.int64)
+  df[f"{date_column}_day"] = df[date_column].dt.day.astype(np.int64)
+  df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek.astype(np.int64)
+
 
   return df.drop(columns=[date_column])
 
@@ -296,7 +297,7 @@ def prepare_data_with_data(data: pd.DataFrame,
     # Scale numerical data
     scaler = StandardScaler()
     # Get the numerical features (excluding extracted date columns)
-    exclude_features = [f'{date_column}_year', f'{date_column}_month', f'{date_column}_day', f'{date_column}_dayofweek']
+    exclude_features = []
     numerical_features = [col for col in X_train.select_dtypes(include=["int64", "float64"]).columns if col not in exclude_features]
     # X_train.select_dtypes(include=["int64", "float64"]).columns
 
