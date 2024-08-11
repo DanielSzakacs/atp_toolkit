@@ -72,7 +72,7 @@ def predict(model_path: str,
   print(f"[INFO] Numerical features: {numerical_features}")
   raw_data[numerical_features] = scaler.transform(raw_data[numerical_features])
   print(f"[INFO] Encode the object features")
-  encoder = load_encoder(encoder_path)
+  encoders = load_encoder(encoder_path)
   for column in raw_data.select_dtypes(include=['object']).columns:
     e = encoder[column]
     if e:
