@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import joblib
+import pickle
 
 import numpy as np
 
@@ -345,17 +346,34 @@ def prepare_data_with_data(data: pd.DataFrame,
     #         path = encoder_path / f"{key}_encoder.pkl"
     #         joblib.dump(value, path)
     #         print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
+
+
     # Save the encoder if save_encoder == true
+    # if save_encoder:
+    #     encoder_path = Path("encoder")
+    #     print(f"[INFO] Save encoders to folder")
+    #     encoder_path.mkdir(parents=True, exist_ok=True)
+
+    #     # Save each encoder to the folder
+    #     for key, value in encoder.items():
+    #         path = encoder_path / f"{key}_encoder.pkl"
+    #         pickle.dump(value, f)  # Save using pickle
+    #         print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
+
+
+    # Save the encoder if save_encoder is True
     if save_encoder:
         encoder_path = Path("encoder")
-        print(f"[INFO] Save encoders to folder")
+        print(f"[INFO] Saving encoders to folder '{encoder_path}'.")
         encoder_path.mkdir(parents=True, exist_ok=True)
 
-        # Save each encoder to the folder
+        # Save each encoder to the folder using pickle
         for key, value in encoder.items():
             path = encoder_path / f"{key}_encoder.pkl"
-            joblib.dump(value, path)  # This line is correct
-            print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
+            with open(path, 'wb') as f:
+                pickle.dump(value, f)  # Save using pickle
+            print(f"[INFO] Saved encoder '{key}_encoder.pkl' to {path}")
+    
 
     # Return
     return X_train, X_test, y_train, y_test, encoder
