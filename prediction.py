@@ -21,13 +21,28 @@ def load_scaler(scaler_path: str):
   return scaler
 
 
-def load_encoder(encoder_dir):
-  for file_name in os.listdir(encoder_dir):
-    print(f"file_name {file_name}")
-    if file_name.endswith(".pkl"):
-      with open(os.path.join(encoder_dir, file_name), 'rb') as f:
-        encoder = pickle.load(f)
-  return encoder
+
+def load_label_encoders(directory_path):
+    # Initialize an empty dictionary to store the LabelEncoders
+    encoders_dict = {}
+
+    # Loop through all files in the directory
+    for filename in os.listdir(directory_path):
+        if filename.endswith('.pkl'):
+            # Get the full path to the .pkl file
+            file_path = os.path.join(directory_path, filename)
+            
+            # Load the LabelEncoder object from the .pkl file
+            with open(file_path, 'rb') as file:
+                encoder = pickle.load(file)
+            
+            # Use the filename without the .pkl extension as the key
+            key = filename[:-4]  # Remove the last four characters (".pkl")
+            
+            # Add the encoder to the dictionary
+            encoders_dict[key] = encoder
+
+    return encoders_dict
 
 
 # Data procession
@@ -72,9 +87,9 @@ def predict(model_path: str,
   print(f"[INFO] Numerical features: {numerical_features}")
   raw_data[numerical_features] = scaler.transform(raw_data[numerical_features])
   print(f"[INFO] Encode the object features")
-  encoders = load_encoder(encoder_path)
+  encoders = load_label_encoders(encoder_path)
   for column in raw_data.select_dtypes(include=['object']).columns:
-    e = encoder[column]
+    e = encoders[column]
     if e:
       print(f"Columns: {column}; Encoder: {e}")
       try:
