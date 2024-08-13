@@ -335,32 +335,6 @@ def prepare_data_with_data(data: pd.DataFrame,
         encoder[column] = le
     print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns have been encoded")
 
-    # # Save the encoder if save_encoder == true
-    # if save_encoder:
-    #     encoder_path = Path("encoder")
-    #     print(f"[INFO] Save encoders to folder")
-    #     encoder_path.mkdir(parents=True, exist_ok=True)
-
-    #     # Save each encoder to the folder
-    #     for key, value in encoder.items():
-    #         path = encoder_path / f"{key}_encoder.pkl"
-    #         joblib.dump(value, path)
-    #         print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
-
-
-    # Save the encoder if save_encoder == true
-    # if save_encoder:
-    #     encoder_path = Path("encoder")
-    #     print(f"[INFO] Save encoders to folder")
-    #     encoder_path.mkdir(parents=True, exist_ok=True)
-
-    #     # Save each encoder to the folder
-    #     for key, value in encoder.items():
-    #         path = encoder_path / f"{key}_encoder.pkl"
-    #         pickle.dump(value, f)  # Save using pickle
-    #         print(f"[INFO] Saved encoder by the name {key}_encoder.pkl to {path}")
-
-
     # Save the encoder if save_encoder is True
     if save_encoder:
         encoder_path = Path("encoder")
