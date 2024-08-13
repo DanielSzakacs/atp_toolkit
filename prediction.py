@@ -8,6 +8,7 @@ from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor
 from zipfile import ZipFile
 import torch
 import pandas as pd
+import difflib
 
 def load_tabnet_model(model_zip_path):
     model = TabNetClassifier()
@@ -103,3 +104,44 @@ def predict(model_path: str,
   raw_data_np = raw_data.to_numpy()
   pred_result = model.predict(raw_data_np)
   print(f"[PREDICTION]  {pred_result}")
+
+
+
+
+
+  # Function to load the LabelEncoder
+def load_label_encoder(encoder_path, encoder_name):
+    path = f"{encoder_path}/{encoder_name}_encoder.pkl"
+    with open(path, 'rb') as file:
+        label_encoder = pickle.load(file)
+    return label_encoder
+
+# Function to check if a name is encoded
+def is_name_encoded(label_encoder, name):
+    return name in label_encoder.classes_
+
+# Function to find similar names using difflib
+def find_similar_names(label_encoder, name, cutoff=0.6):
+    similar_names = difflib.get_close_matches(name, label_encoder.classes_, n=5, cutoff=cutoff)
+    return similar_names
+
+def checkSimilarNameInEncoder(encoder_path:str, 
+                              encoder_name: str,
+                              name_to_check: str):
+  label_encoder = load_label_encoder(encoder_path, encoder_name)
+
+  """ 
+    Check if the nem is encoded, or it has similar encoded name in the encoder. Ex: "Mike P." == "Mike Peace"
+  """
+  # Check if the name is encoded
+  if is_name_encoded(label_encoder, name_to_check):
+      print(f"The name '{name_to_check}' is already encoded.")
+  else:
+      print(f"The name '{name_to_check}' is NOT encoded.")
+      
+      # Find similar names
+      similar = find_similar_names(label_encoder, name_to_check)
+      if similar:
+          print(f"Did you mean one of these? {similar}")
+      else:
+          print("No similar names found.")
