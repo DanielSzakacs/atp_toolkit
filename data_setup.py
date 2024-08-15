@@ -290,8 +290,10 @@ def filter_ppd_df_v1(param_df):
   return new_df
 
 
-def extract_date_feature(df, date_column):
-  df[date_column] = pd.to_datetime(df[date_column])
+def extract_date_feature(df, 
+                         date_column,
+                         date_format: str = "MM/DD/YYYY"):
+  df[date_column] = pd.to_datetime(df[date_column], format=date_format)
   df[f"{date_column}_year"] = df[date_column].dt.year.astype(np.int64)
   df[f"{date_column}_month"] = df[date_column].dt.month.astype(np.int64)
   df[f"{date_column}_day"] = df[date_column].dt.day.astype(np.int64)
@@ -307,7 +309,8 @@ def prepare_data_with_data(data: pd.DataFrame,
                  test_size: float,
                  date_column: str,
                  save_encoder: bool=False,
-                 fillout_numerical_with_mean: bool = False):
+                 fillout_numerical_with_mean: bool = False,
+                 date_format: str = "MM/DD/YYYY"):
     """
     Removes all rows which contains NaN or fillout
     Encode the objects
@@ -340,7 +343,7 @@ def prepare_data_with_data(data: pd.DataFrame,
 
     # Process date columns
     if(date_column):
-      clear_df = extract_date_feature(clear_df, date_column)
+      clear_df = extract_date_feature(clear_df, date_column, date_format=date_format)
       print(f"[INFO] Processed data columns: {date_column}")
 
     # Split data to X and y
