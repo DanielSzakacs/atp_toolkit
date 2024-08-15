@@ -508,7 +508,8 @@ def prepare_data_with_data(data: pd.DataFrame,
     # Scale numerical data
     scaler = StandardScaler()
     # Get the numerical features (excluding extracted date columns)
-    exclude_features = ['Date_year', 'Date_month', 'Date_day', 'Date_dayofweek']
+    exclude_features = ['Date_year', 'Date_month', 'Date_day', 'Date_dayofweek', 
+                        'P1_rank', 'P2_rank']
     numerical_features = [col for col in X_train.select_dtypes(include=["int64", "float64"]).columns if col not in exclude_features]
     # X_train.select_dtypes(include=["int64", "float64"]).columns
 
