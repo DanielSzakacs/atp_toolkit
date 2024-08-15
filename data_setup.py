@@ -122,7 +122,7 @@ def marge_data_dir_files(folderPath: str = "github_atp_stat"):
   return data
 
 
-def form_dataframe_functions(df):
+def filter_df_v1(df):
   """ 
     This functinos will remove some of the columns and keep only these: 
     [Location, Tournament, Court, Surface, Player1, Player2, Odds1, Odds2, Odds3, Target]
@@ -169,7 +169,7 @@ def form_dataframe_functions(df):
   return new_df
 
 
-def form_dataframe_functions_oods(df):
+def filter_df_v2_only_oods(df):
   """ 
     This functinos will remove ALL the columns which are not odds data: 
     [Odds1, Odds2, Odds3, Target]
@@ -205,7 +205,7 @@ def form_dataframe_functions_oods(df):
   return new_df
 
 
-def form_dataframe_v2(df):
+def filter_df_v3_odds_with_date(df):
   """ 
     This functinos will remove some of the columns and keep only these: 
     [Date, Player1, Player2, Odds1, Odds2, Odds3, Target]
@@ -260,7 +260,7 @@ def prepare_data_with_data(data: pd.DataFrame,
                  save_encoder: bool=False,
                  fillout_numerical_with_mean: bool = False):
     """
-    Removes all rows which contains NaN
+    Removes all rows which contains NaN or fillout
     Encode the objects
     Saves the encoder if params true
     Split data to train and test
