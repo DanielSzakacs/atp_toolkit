@@ -282,11 +282,12 @@ def prepare_data_with_data(data: pd.DataFrame,
 
     # Drop NaN rows
     if fillout_numerical_with_mean:
+      print(f"[INFO] Fillout NaN with mean")
       numerical_features = [col for col in data.select_dtypes(include=["int64", "float64"]).columns if col not in ["Winner"]]
       data[numerical_features] = data[numerical_features].fillna(data[numerical_features].mean())
-    else:
-      clear_df = data.dropna()
-      print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
+    
+    clear_df = data.dropna()
+    print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
 
     # Process date columns
     if(date_column):
