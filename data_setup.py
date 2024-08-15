@@ -290,15 +290,164 @@ def filter_ppd_df_v1(param_df):
   return new_df
 
 
-def extract_date_feature(df, 
-                         date_column,
-                         date_format: str = "MM/DD/YYYY"):
-  df[date_column] = pd.to_datetime(df[date_column], format=date_format)
+# def extract_date_feature(df, 
+#                          date_column,
+#                          date_format: str = "MM/DD/YYYY"):
+#   df[date_column] = pd.to_datetime(df[date_column], format=date_format)
+#   df[f"{date_column}_year"] = df[date_column].dt.year.astype(np.int64)
+#   df[f"{date_column}_month"] = df[date_column].dt.month.astype(np.int64)
+#   df[f"{date_column}_day"] = df[date_column].dt.day.astype(np.int64)
+#   df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek.astype(np.int64)
+
+
+#   return df.drop(columns=[date_column])
+
+
+# # Split, form date, skale numerical data, encode object type of features
+# def prepare_data_with_data(data: pd.DataFrame,
+#                  target_column: str,
+#                  test_size: float,
+#                  date_column: str,
+#                  save_encoder: bool=False,
+#                  fillout_numerical_with_mean: bool = False,
+#                  date_format: str = "MM/DD/YYYY"):
+#     """
+#     Removes all rows which contains NaN or fillout
+#     Encode the objects
+#     Saves the encoder if params true
+#     Split data to train and test
+
+#     Args:
+#       data: pd.DataFrame
+#       target_column: str - name of the target
+#       test_size: float,
+#       save_encoder: bool
+
+#     Returns:
+#       X_train, X_test, y_train, y_test
+#       encoder
+#     """
+
+#     print(f"[INFO] Input data length: {len(data)}")
+#     # Shuffle the data rows
+#     data = data.sample(frac=1).reset_index(drop=True)
+
+#     # Drop NaN rows
+#     if fillout_numerical_with_mean:
+#       print(f"[INFO] Fillout NaN with mean")
+#       numerical_features = [col for col in data.select_dtypes(include=["int64", "float64"]).columns if col not in ["Winner"]]
+#       data[numerical_features] = data[numerical_features].fillna(data[numerical_features].mean())
+    
+#     clear_df = data.dropna()
+#     print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
+
+#     # Process date columns
+#     if(date_column):
+#       clear_df = extract_date_feature(clear_df, date_column, date_format=date_format)
+#       print(f"[INFO] Processed data columns: {date_column}")
+
+#     # Split data to X and y
+#     X = clear_df.drop(columns=[target_column])
+#     y = clear_df[target_column]
+#     print(f"[INFO] Split to X and y")
+
+#     # Split data into train and test data
+#     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+#     print(f"[INFO] Data split to train and test data")
+
+#     # Scale numerical data
+#     scaler = StandardScaler()
+#     # Get the numerical features (excluding extracted date columns)
+#     exclude_features = []
+#     numerical_features = [col for col in X_train.select_dtypes(include=["int64", "float64"]).columns if col not in exclude_features]
+#     # X_train.select_dtypes(include=["int64", "float64"]).columns
+
+#     # Fit the scaler on the training data and transform the training data
+#     X_train[numerical_features] = scaler.fit_transform(X_train[numerical_features])
+#     # Transform the test data
+#     X_test[numerical_features] = scaler.transform(X_test[numerical_features])
+#     print(f"[INFO] Scaler: {len(numerical_features)} number of features have been scaled (Both train and test data)")
+
+#     # Save scaler
+#     scaler_path = Path("scaler/scaler.joblib")
+#     scaler_path.parent.mkdir(parents=True, exist_ok=True)
+#     joblib.dump(scaler, scaler_path)
+#     print(f"[INFO] Scaler saved to {scaler_path}")
+
+#     # Encode X features if type object
+#     encoder = {}
+#     for column in X.select_dtypes(include=['object']).columns:
+#         # Convert all values to strings to ensure uniformity
+#         X_train[column] = X_train[column].astype(str)
+#         X_test[column] = X_test[column].astype(str)
+#         le = LabelEncoder()
+#         X_train[column] = le.fit_transform(X_train[column])
+#         try:
+#             X_test[column] = le.transform(X_test[column])
+#         except ValueError as e:
+#             # Log the error and assign a default value (e.g., -1) to unseen labels
+#             print(f"[WARNING] Unseen label in column '{column}': {e}")
+#             unseen_labels = set(X_test[column].unique()) - set(le.classes_)
+#             unseen_label_map = {label: -1 for label in unseen_labels}
+#             X_test[column] = X_test[column].map(lambda x: le.transform([x])[0] if x in le.classes_ else unseen_label_map[x])
+#         encoder[column] = le
+#     print(f"[INFO] LabelEncoder logic finished. {len(encoder)} number of columns have been encoded")
+
+#     # Save the encoder if save_encoder is True
+#     if save_encoder:
+#         encoder_path = Path("encoder")
+#         print(f"[INFO] Saving encoders to folder '{encoder_path}'.")
+#         encoder_path.mkdir(parents=True, exist_ok=True)
+
+#         # Save each encoder to the folder using pickle
+#         for key, value in encoder.items():
+#             path = encoder_path / f"{key}_encoder.pkl"
+#             with open(path, 'wb') as f:
+#                 pickle.dump(value, f)  # Save using pickle
+#             print(f"[INFO] Saved encoder '{key}_encoder.pkl' to {path}")
+    
+
+#     # Return
+#     return X_train, X_test, y_train, y_test, encoder
+
+
+
+def extract_date_feature_v1(df, 
+                         date_column):
+  df[date_column] = pd.to_datetime(df[date_column])
   df[f"{date_column}_year"] = df[date_column].dt.year.astype(np.int64)
   df[f"{date_column}_month"] = df[date_column].dt.month.astype(np.int64)
   df[f"{date_column}_day"] = df[date_column].dt.day.astype(np.int64)
   df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek.astype(np.int64)
+  return df.drop(columns=[date_column])
 
+
+def extract_date_feature_v2(df, date_column):
+  """
+  Extracts date features from a column in a pandas DataFrame.
+
+  Args:
+    df: The pandas DataFrame.
+    date_column: The name of the column containing date strings.
+    default_format: The default format of the date strings (optional, defaults to MM/DD/YYYY).
+
+  Returns:
+    The modified DataFrame with additional date feature columns.
+  """
+
+  
+  try:
+    df[date_column] = pd.to_datetime(df[date_column], format="%Y%m%d")
+    print(f"Warning: Date format in '{date_column}' seems to be YYYYMMDD.")
+  except ValueError:
+    # Raise an informative error if both formats fail
+    raise ValueError(f"Could not parse date format in column '{date_column}'.")
+
+  # Add year, month, day, and dayofweek features
+  df[f"{date_column}_year"] = df[date_column].dt.year.astype(np.int64)
+  df[f"{date_column}_month"] = df[date_column].dt.month.astype(np.int64)
+  df[f"{date_column}_day"] = df[date_column].dt.day.astype(np.int64)
+  df[f"{date_column}_dayofweek"] = df[date_column].dt.dayofweek.astype(np.int64)
 
   return df.drop(columns=[date_column])
 
@@ -308,9 +457,10 @@ def prepare_data_with_data(data: pd.DataFrame,
                  target_column: str,
                  test_size: float,
                  date_column: str,
+                 date_formater_callable, 
                  save_encoder: bool=False,
                  fillout_numerical_with_mean: bool = False,
-                 date_format: str = "MM/DD/YYYY"):
+                 ):
     """
     Removes all rows which contains NaN or fillout
     Encode the objects
@@ -343,7 +493,7 @@ def prepare_data_with_data(data: pd.DataFrame,
 
     # Process date columns
     if(date_column):
-      clear_df = extract_date_feature(clear_df, date_column, date_format=date_format)
+      clear_df = date_formater_callable(clear_df, date_column)
       print(f"[INFO] Processed data columns: {date_column}")
 
     # Split data to X and y
@@ -358,7 +508,7 @@ def prepare_data_with_data(data: pd.DataFrame,
     # Scale numerical data
     scaler = StandardScaler()
     # Get the numerical features (excluding extracted date columns)
-    exclude_features = []
+    exclude_features = ['Date_year', 'Date_month', 'Date_day', 'Date_dayofweek']
     numerical_features = [col for col in X_train.select_dtypes(include=["int64", "float64"]).columns if col not in exclude_features]
     # X_train.select_dtypes(include=["int64", "float64"]).columns
 
@@ -366,7 +516,7 @@ def prepare_data_with_data(data: pd.DataFrame,
     X_train[numerical_features] = scaler.fit_transform(X_train[numerical_features])
     # Transform the test data
     X_test[numerical_features] = scaler.transform(X_test[numerical_features])
-    print(f"[INFO] Scaler: {len(numerical_features)} number of features have been scaled (Both train and test data)")
+    print(f"[INFO] Scaler: {len(numerical_features)} number of features have been scaled (Both train and test data): {numerical_features}")
 
     # Save scaler
     scaler_path = Path("scaler/scaler.joblib")
