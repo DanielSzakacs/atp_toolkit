@@ -240,6 +240,55 @@ def filter_df_v3_odds_with_date(df):
   return new_df
 
 
+def filter_ppd_df_v1(param_df):
+  """
+    ppd = Players persional data
+    Rename and remove unused features from the dataframe. 
+    To make it sure that the df data is ready for the model fit.
+
+    Only keeps the: Date, Name, Hand, Height, Country code, Age, APT rank, Rank point, Winner
+
+    Source: 
+      https://github.com/JeffSackmann/tennis_atp/blob/master/atp_matches_2023.csv
+  """
+
+
+  data = []
+
+  for index, row in param_df.iterrows():
+    data.append([ row["tourney_date"], 
+                  row["winner_name"], row["loser_name"],
+                  row["winner_hand"], row["loser_hand"],
+                  row["winner_ht"], row["loser_ht"],
+                  row["winner_ioc"], row["loser_ioc"],
+                  row["winner_age"], row["loser_age"],
+                  row["winner_rank"], row["loser_rank"],
+                  row["winner_rank_points"], row["loser_rank_points"],
+                   1])
+
+    data.append([row["tourney_date"],
+                 row["loser_name"], row["winner_name"],
+                 row["loser_hand"], row["winner_hand"],
+                 row["loser_ht"], row["winner_ht"],
+                 row["loser_ioc"], row["winner_ioc"],
+                 row["loser_age"], row["winner_age"],
+                 row["loser_rank"], row["winner_rank"],
+                 row["loser_rank_points"], row["winner_rank_points"],
+                 0])
+
+  # Create a new DataFrame
+  new_df = pd.DataFrame(data, columns=["Date",
+                                       "Player1", "Player2",
+                                       "P1_hand", "P2_hand",
+                                       "P1_ht", "P2_ht",
+                                       "P1_ioc", "P2_ioc",
+                                       "P1_age", "P2_age",
+                                       "P1_rank", "P2_rank",
+                                       "P1_rank_points", "P2_rank_points",
+                                       "Winner"])
+  print(f"Createing dataframe. Original length: {len(param_df)} | New length {len(new_df)}")
+  return new_df
+
 
 def extract_date_feature(df, date_column):
   df[date_column] = pd.to_datetime(df[date_column])
