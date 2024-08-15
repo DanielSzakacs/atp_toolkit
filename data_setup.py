@@ -257,7 +257,8 @@ def prepare_data_with_data(data: pd.DataFrame,
                  target_column: str,
                  test_size: float,
                  date_column: str,
-                 save_encoder: bool=False):
+                 save_encoder: bool=False,
+                 fillout_numerical_with_mean: bool = False):
     """
     Removes all rows which contains NaN
     Encode the objects
@@ -280,8 +281,12 @@ def prepare_data_with_data(data: pd.DataFrame,
     data = data.sample(frac=1).reset_index(drop=True)
 
     # Drop NaN rows
-    clear_df = data.dropna()
-    print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
+    if fillout_numerical_with_mean:
+      numerical_features = [col for col in data.select_dtypes(include=["int64", "float64"]).columns if col not in ["Winner"]]
+      data[numerical_features] = data[numerical_features].fillna(data[numerical_features].mean())
+    else:
+      clear_df = data.dropna()
+      print(f"[INFO] {len(data) - len(clear_df)} rows removed because of NaN features")
 
     # Process date columns
     if(date_column):
