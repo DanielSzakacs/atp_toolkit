@@ -18,7 +18,8 @@ import numpy as np
 NUM_WORKERS = os.cpu_count()
 
 def download_tennis_atp_match_stat_github(year: int,
-                                          target_path: str = "github_atp_stat"):
+                                          target_path: str = "github_atp_stat",
+                                          is_wta: bool = False):
   """
     Download Tennis match data from github https://github.com/JeffSackmann/tennis_atp/tree/master 
     Github repo url: https://github.com/JeffSackmann/tennis_atp/tree/master
@@ -41,7 +42,10 @@ def download_tennis_atp_match_stat_github(year: int,
 
   # Download data
   with open(data_path / f"{year}.csv", "wb") as f:
-    request = requests.get(f"https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_{year}.csv")
+    if is_wta:
+      request = requests.get(f"https://raw.githubusercontent.com/JeffSackmann/tennis_wta/master/wta_matches_{year}.csv")
+    else: 
+      request = requests.get(f"https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_{year}.csv")
     print("Data download")
     f.write(request.content)
 
