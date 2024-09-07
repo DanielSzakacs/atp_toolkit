@@ -40,8 +40,13 @@ def download_tennis_atp_match_stat_github(year: int,
     print(f"Directory do not exist ... will be created")
     data_path.mkdir(parents=True, exist_ok=True)
 
+  if is_wta:
+    file_name = "_wta"
+  else:
+    file_name = "_apt" 
+    
   # Download data
-  with open(data_path / f"{year}.csv", "wb") as f:
+  with open(data_path / f"{year}{file_name}.csv", "wb") as f:
     if is_wta:
       request = requests.get(f"https://raw.githubusercontent.com/JeffSackmann/tennis_wta/master/wta_matches_{year}.csv")
     else: 
