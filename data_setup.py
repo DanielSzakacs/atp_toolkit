@@ -44,7 +44,7 @@ def download_tennis_atp_match_stat_github(year: int,
     file_name = "_wta"
   else:
     file_name = "_apt" 
-    
+
   # Download data
   with open(data_path / f"{year}{file_name}.csv", "wb") as f:
     if is_wta:
@@ -55,7 +55,8 @@ def download_tennis_atp_match_stat_github(year: int,
     f.write(request.content)
 
 def download_tennis_data_co_uk_file_github(year: int,
-                                          target_path: str = "tennis.co.uk_atp_stat"):
+                                          target_path: str = "tennis.co.uk_atp_stat",
+                                          is_wta: bool = False):
   """
     Source of the data is: http://www.tennis-data.co.uk/alldata.php
     Github repo url: https://github.com/DanielSzakacs/atp_data
@@ -76,9 +77,17 @@ def download_tennis_data_co_uk_file_github(year: int,
     print(f"Directory do not exist ... will be created")
     data_path.mkdir(parents=True, exist_ok=True)
 
-  # Download data
-  with open(data_path / f"{year}.csv", "wb") as f:
-    request = requests.get(f"https://raw.githubusercontent.com/DanielSzakacs/atp_data/main/{year}.csv")
+  if is_wta:
+    file_name = "_wta"
+  else:
+    file_name = "_apt" 
+
+    # Download data
+  with open(data_path / f"{year}{file_name}.csv", "wb") as f:
+    if is_wta:
+      request = requests.get(f"https://raw.githubusercontent.com/DanielSzakacs/wta_data/main/{year}.csv")
+    else: 
+      request = requests.get(f"https://raw.githubusercontent.com/DanielSzakacs/atp_data/main/{year}.csv")
     print("Data download")
     f.write(request.content)
 
